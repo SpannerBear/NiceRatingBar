@@ -28,15 +28,15 @@ public class NiceRatingBar extends LinearLayout {
     private float mRating;
     private OnRatingChangedListener mOnRatingChangedListener;
     private List<Integer> mBoundaryList = new ArrayList<>(5);
-
+    
     public NiceRatingBar(Context context) {
         this(context, null);
     }
-
+    
     public NiceRatingBar(Context context, AttributeSet attrs) {
         this(context, attrs, -1);
     }
-
+    
     public NiceRatingBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         if (attrs == null) {
@@ -44,10 +44,10 @@ public class NiceRatingBar extends LinearLayout {
         }
         init(attrs);
     }
-
+    
     private void init(AttributeSet attrs) {
         setOrientation(HORIZONTAL);
-
+        
         TypedArray mTypedArray = getContext().obtainStyledAttributes(attrs, R.styleable.NiceRatingBar);
         mRatingStatus = RatingStatus.getStatus(mTypedArray.getInt(R.styleable.NiceRatingBar_nrb_ratingStatus, RatingStatus.Disable.mStatus));
         mStarFullDrawable = mTypedArray.getDrawable(R.styleable.NiceRatingBar_nrb_starFullResource);
@@ -63,14 +63,14 @@ public class NiceRatingBar extends LinearLayout {
             throw new IllegalArgumentException("NiceRatingBar Error: starTotal must be positive!");
         mRating = mTypedArray.getFloat(R.styleable.NiceRatingBar_nrb_rating, 5f);
         mTypedArray.recycle();
-
-        for (int i = 0; i < mStarTotal; i ++) {
+        
+        for (int i = 0; i < mStarTotal; i++) {
             addView(createStarImageView(i == mStarTotal - 1));
         }
-
+        
         setRating(mRating);
     }
-
+    
     private ImageView createStarImageView(boolean isLast) {
         ImageView imageView = new ImageView(getContext());
         LayoutParams layoutParams = new LayoutParams(Math.round(mStarWidth), Math.round(mStarHeight));
@@ -78,7 +78,7 @@ public class NiceRatingBar extends LinearLayout {
         imageView.setLayoutParams(layoutParams);
         return imageView;
     }
-
+    
     public void setRating(float rating) {
         if (rating > mStarTotal) {
             rating = mStarTotal;
@@ -87,32 +87,33 @@ public class NiceRatingBar extends LinearLayout {
         if (mOnRatingChangedListener != null) {
             mOnRatingChangedListener.onRatingChanged(rating);
         }
-
+        
         int partInteger = (int) Math.floor(rating);
         float partDecimal = new BigDecimal(String.valueOf(rating))
                 .subtract(new BigDecimal(String.valueOf(partInteger)))
                 .floatValue();
-
+        
         for (int i = 0; i < partInteger; i++) {
-            ((ImageView)getChildAt(i)).setImageDrawable(mStarFullDrawable);
+            ((ImageView) getChildAt(i)).setImageDrawable(mStarFullDrawable);
         }
-
-        for (int i = partInteger; i < mStarTotal; i ++) {
-            ((ImageView)getChildAt(i)).setImageDrawable(mStarEmptyDrawable);
+        
+        for (int i = partInteger; i < mStarTotal; i++) {
+            ((ImageView) getChildAt(i)).setImageDrawable(mStarEmptyDrawable);
         }
-
+        
         if (partDecimal >= 0.25) {
             if (partDecimal < 0.75 && mStarHalfDrawable != null) {
-                ((ImageView)getChildAt(partInteger)).setImageDrawable(mStarHalfDrawable);
-            } else if (partDecimal >= 0.75){
-                ((ImageView)getChildAt(partInteger)).setImageDrawable(mStarFullDrawable);
+                ((ImageView) getChildAt(partInteger)).setImageDrawable(mStarHalfDrawable);
+            } else if (partDecimal >= 0.75) {
+                ((ImageView) getChildAt(partInteger)).setImageDrawable(mStarFullDrawable);
             }
         }
     }
-
+    
     private float calculateRating(float touchX) {
         float result = 0;
-        for (int i = 0; i < mStarTotal - 1; i ++) {
+        for (int i = 0; i < mStarTotal - 1; i++) {
+            //查询每一个星星左边界.以及下一个星星的左边界
             if (touchX >= mBoundaryList.get(i) && touchX <= mBoundaryList.get(i + 1)) {
                 if (mStarHalfDrawable != null && touchX < (mBoundaryList.get(i) + mBoundaryList.get(i + 1)) / 2)
                     result = i + 0.5f;
@@ -129,7 +130,7 @@ public class NiceRatingBar extends LinearLayout {
         }*/
         return result;
     }
-
+    
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -139,21 +140,21 @@ public class NiceRatingBar extends LinearLayout {
         }
         return super.onTouchEvent(event);
     }
-
+    
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         if (mBoundaryList.isEmpty()) {
             for (int index = 0; index < mStarTotal; index++) {
-                mBoundaryList.add(index == 0 ? getLeft() : mBoundaryList.get(index - 1) + Math.round(mStarWidth) + Math.round(mStarPadding));
+                mBoundaryList.add(index == 0 ? 0 : mBoundaryList.get(index - 1) + Math.round(mStarWidth) + Math.round(mStarPadding));
             }
         }
     }
-
+    
     public void setOnRatingChangedListener(OnRatingChangedListener listener) {
         this.mOnRatingChangedListener = listener;
     }
-
+    
     public void setRatingStatus(RatingStatus status) {
         this.mRatingStatus = status;
     }
